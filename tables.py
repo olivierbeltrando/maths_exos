@@ -2,16 +2,23 @@ import os
 import sys
 
 from datetime import datetime
+from random import shuffle
 
-to_do = set()
-dones = set()
-failed = set()
+to_do = []
+dones = []
+failed = []
+cpt_good = 0
+cpt_bad = 0
+difficults = set()
 
 tables = sys.argv[1:]
 print(f"revisions pour les tables de {tables}")
 for i in tables:
     for j in range(11):
-        to_do.add((int(i), j))
+        to_do.append((int(i), j))
+
+# type "set" is not really ranmdom. shuffle ftw
+shuffle(to_do)
 
 
 class bcolors:
@@ -30,10 +37,15 @@ temps = []
 
 
 def exo(i, j):
-    print(f"{i} x {j} =")
     start_t = datetime.now()
     while True:
+        os.system("clear")
+        print(f"Multiplications réussies: {bcolors.HEADER}{len(dones)}{bcolors.ENDC}")
+        print(f"Multiplications a faire: {bcolors.OKBLUE}{len(to_do)}{bcolors.ENDC}")
+        print(f"Multiplications a re-faire: {bcolors.FAIL}{len(failed)}{bcolors.ENDC}")
+        print(f"{i} x {j} =")
         res = input()
+        displayOnce = 0
         try:
             res = int(res.strip())
         except ValueError as e:
@@ -61,20 +73,23 @@ while to_do or failed:
         ele = to_do.pop()
     elif failed:
         ele = failed.pop()
-    os.system("clear")
-    print(f"Multiplications a faire: {bcolors.HEADER}{len(to_do)}{bcolors.ENDC}")
-    print(f"Multiplications a re-faire: {bcolors.FAIL}{len(failed)}{bcolors.ENDC}")
     res = exo(*ele)
     if res == "success":
-        dones.add(ele)
+        cpt_good += 1
+        dones.append(ele)
     else:
+        difficults.add(ele)
+        cpt_bad += 1
         # errors are added twice
-        failed.add(ele)
+        failed.append(ele)
         i, j = ele
-        failed.add((j, i))
+        failed.append((j, i))
+        shuffle(failed)
 
 print(f"{bcolors.HEADER}BRAVO c'est terminé {bcolors.ENDC}")
 print(f"Tu as fait {bcolors.HEADER}{len(dones)}{bcolors.ENDC} multiplications")
+print(f"Fautes: {bcolors.FAIL}{cpt_bad}{bcolors.ENDC}")
+print(f"Difficiles: {bcolors.FAIL}{difficults}{bcolors.ENDC}")
 seconds = [t.total_seconds() for t in temps]
 somme = int(sum(seconds))
 average = int(sum(seconds) / len(seconds))
