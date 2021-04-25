@@ -16,7 +16,7 @@ class Status:
         self.temps = []
 
 
-class Op(Enum):
+class Operation(Enum):
     Add = auto()
     Sub = auto()
     Mult = auto()
@@ -32,14 +32,25 @@ class Op(Enum):
         }[randint(0, 3)]
 
     def __repr__(self):
-        if self == Op.Add:
+        if self == Operation.Add:
             return "+"
-        if self == Op.Sub:
+        if self == Operation.Sub:
             return "-"
-        if self == Op.Mult:
+        if self == Operation.Mult:
             return "x"
-        if self == Op.Div:
+        if self == Operation.Div:
             return "/"
+        raise Exception("should never occur")
+
+    def compute(self, i, j):
+        if self == Operation.Add:
+            return i + j
+        if self == Operation.Sub:
+            return i - j
+        if self == Operation.Mult:
+            return i * j
+        if self == Operation.Div:
+            return i / j
         raise Exception("should never occur")
 
 
@@ -59,25 +70,13 @@ def exo(i, j, operation, status):
     start_t = datetime.now()
     while True:
         os.system("clear")
+        print(f"Opérations réussies: {Bcolors.HEADER}{len(status.dones)}{Bcolors.ENDC}")
+        print(f"Opérations à faire: {Bcolors.OKBLUE}{len(status.to_do)}{Bcolors.ENDC}")
         print(
-            f"Multiplications réussies: {Bcolors.HEADER}{len(status.dones)}{Bcolors.ENDC}"
-        )
-        print(
-            f"Multiplications a faire: {Bcolors.OKBLUE}{len(status.to_do)}{Bcolors.ENDC}"
-        )
-        print(
-            f"Multiplications a re-faire: {Bcolors.FAIL}{len(status.failed)}{Bcolors.ENDC}"
+            f"Opérations à re-faire: {Bcolors.FAIL}{len(status.failed)}{Bcolors.ENDC}"
         )
         txt = f"{i} {repr(operation)} {j} ="
         print(txt)
-        if operation == operation.Add:
-            expected = i + j
-        elif operation == operation.Sub:
-            expected = i - j
-        elif operation == operation.Mult:
-            expected = i * j
-        elif operation == operation.Div:
-            expected = i / j
         res = input()
         try:
             res = int(res.strip())
@@ -85,6 +84,7 @@ def exo(i, j, operation, status):
             print("ce n'est pas un nombre...")
             continue
 
+        expected = operation.compute(i, j)
         success = res == expected
         print(f"{txt} {expected}")
         if success:
@@ -117,14 +117,12 @@ def do_exercise(to_do):
             status.failed.append(ele)
             # except for '-'
             i, j, operation = ele
-            if operation != Op.Sub:
+            if operation != Operation.Sub:
                 status.failed.append((j, i, operation))
             shuffle(status.failed)
 
     print(f"{Bcolors.HEADER}BRAVO c'est terminé {Bcolors.ENDC}")
-    print(
-        f"Tu as fait {Bcolors.HEADER}{len(status.dones)}{Bcolors.ENDC} multiplications"
-    )
+    print(f"Tu as fait {Bcolors.HEADER}{len(status.dones)}{Bcolors.ENDC} opérations")
     print(f"Fautes: {Bcolors.FAIL}{status.cpt_bad}{Bcolors.ENDC}")
     print(f"Difficiles: {Bcolors.FAIL}{status.difficults}{Bcolors.ENDC}")
     seconds = [t.total_seconds() for t in status.temps]
