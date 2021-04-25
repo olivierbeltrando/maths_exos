@@ -115,8 +115,10 @@ def do_exercise(to_do):
             status.cpt_bad += 1
             # errors are added twice
             status.failed.append(ele)
+            # except for '-'
             i, j, operation = ele
-            status.failed.append((j, i, operation))
+            if operation != Op.Sub:
+                status.failed.append((j, i, operation))
             shuffle(status.failed)
 
     print(f"{Bcolors.HEADER}BRAVO c'est terminé {Bcolors.ENDC}")
