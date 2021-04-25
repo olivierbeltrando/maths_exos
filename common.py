@@ -100,32 +100,41 @@ def do_exercise(to_do):
     # type "set" is not really ranmdom. shuffle ftw
     shuffle(to_do)
     status = Status(to_do)
+    interrupted = False
+    try:
+        while status.to_do or status.failed:
+            if to_do:
+                ele = to_do.pop()
+            elif status.failed:
+                ele = status.failed.pop()
+            res = exo(*ele, status)
+            if res == "success":
+                status.cpt_good += 1
+                status.dones.append(ele)
+            else:
+                status.difficults.add(ele)
+                status.cpt_bad += 1
+                # errors are added twice
+                status.failed.append(ele)
+                # except for '-'
+                i, j, operation = ele
+                if operation != Operation.Sub:
+                    status.failed.append((j, i, operation))
+                shuffle(status.failed)
+    except KeyboardInterrupt:
+        interrupted = True
+        print("Programme intérrompu")
+        print(
+            f"Il restait à faire: {Bcolors.FAIL}{len(status.to_do) + len(status.failed)}{Bcolors.ENDC}"
+        )
 
-    while status.to_do or status.failed:
-        if to_do:
-            ele = to_do.pop()
-        elif status.failed:
-            ele = status.failed.pop()
-        res = exo(*ele, status)
-        if res == "success":
-            status.cpt_good += 1
-            status.dones.append(ele)
-        else:
-            status.difficults.add(ele)
-            status.cpt_bad += 1
-            # errors are added twice
-            status.failed.append(ele)
-            # except for '-'
-            i, j, operation = ele
-            if operation != Operation.Sub:
-                status.failed.append((j, i, operation))
-            shuffle(status.failed)
-
-    print(f"{Bcolors.HEADER}BRAVO c'est terminé {Bcolors.ENDC}")
+    if not interrupted:
+        print(f"{Bcolors.HEADER}BRAVO c'est terminé {Bcolors.ENDC}")
     print(f"Tu as fait {Bcolors.HEADER}{len(status.dones)}{Bcolors.ENDC} opérations")
     print(f"Fautes: {Bcolors.FAIL}{status.cpt_bad}{Bcolors.ENDC}")
     print(f"Difficiles: {Bcolors.FAIL}{status.difficults}{Bcolors.ENDC}")
     seconds = [t.total_seconds() for t in status.temps]
     somme = int(sum(seconds))
-    average = int(sum(seconds) / len(seconds))
-    print(f"Tu as mis {somme}s soit {average}s par réponse")
+    if len(seconds) != 0:
+        average = int(sum(seconds) / len(seconds))
+        print(f"Tu as mis {somme}s soit {average}s par réponse")
