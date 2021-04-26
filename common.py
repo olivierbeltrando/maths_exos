@@ -21,15 +21,18 @@ class Operation(Enum):
     Sub = auto()
     Mult = auto()
     Div = auto()
+    Compl = auto()
 
     @classmethod
     def random(cls):
-        return {
-            0: cls.Add,
-            1: cls.Sub,
-            2: cls.Sub,
-            3: cls.Div,
-        }[randint(0, 3)]
+        possible_operations = [
+            cls.Add,
+            cls.Sub,
+            cls.Sub,
+            cls.Div,
+            cls.Compl,
+        ]
+        return possible_operations[randint(0, len(possible_operations) - 1)]
 
     def __repr__(self):
         if self == Operation.Add:
@@ -40,6 +43,8 @@ class Operation(Enum):
             return "x"
         if self == Operation.Div:
             return "/"
+        if self == Operation.Compl:
+            return "complement à"
         raise Exception("should never occur")
 
     def compute(self, i, j):
@@ -51,6 +56,8 @@ class Operation(Enum):
             return i * j
         if self == Operation.Div:
             return i / j
+        if self == Operation.Compl:
+            return j - i
         raise Exception("should never occur")
 
 
@@ -116,17 +123,16 @@ def do_exercise(to_do):
                 status.cpt_bad += 1
                 # errors are added twice
                 status.failed.append(ele)
-                # except for '-'
+                # except for '-' or Compl
                 i, j, operation = ele
-                if operation != Operation.Sub:
+                if operation not in (Operation.Sub, Operation.Compl):
                     status.failed.append((j, i, operation))
                 shuffle(status.failed)
     except KeyboardInterrupt:
         interrupted = True
-        print("Programme intérrompu")
-        print(
-            f"Il restait à faire: {Bcolors.FAIL}{len(status.to_do) + len(status.failed)}{Bcolors.ENDC}"
-        )
+        print("Programme interrompu")
+        restant = len(status.to_do) + len(status.failed)
+        print(f"Il restait à faire: {Bcolors.FAIL}{restant}{Bcolors.ENDC}")
 
     if not interrupted:
         print(f"{Bcolors.HEADER}BRAVO c'est terminé {Bcolors.ENDC}")
