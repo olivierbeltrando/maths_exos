@@ -74,6 +74,6 @@ if __name__ == "__main__":
     adds = gen_adds(NUMBERS, NUMBER_ZERO_MAX)
     mult = gen_multis(NUMBERS)
     nines = gen_nines(NUMBERS, NUMBER_ZERO_MAX)
+    compls = gen_compl_xx(NUMBERS, NUMBER_ZERO_MAX)
 
-    do_exercise(list(adds.union(mult).union(nines)))
-    # do_exercise(list(gen_compl_xx(3, 3)))
+    do_exercise(list(adds.union(mult).union(nines).union(compls)))
