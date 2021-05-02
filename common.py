@@ -84,11 +84,16 @@ def exo(i, j, operation, status):
         )
         txt = f"{i} {repr(operation)} {j} ="
         print(txt)
-        res = input()
         try:
+            res = input()
             res = int(res.strip())
         except ValueError:
             print("ce n'est pas un nombre...")
+            continue
+        except KeyboardInterrupt as e:
+            yn = input("abandon ?\n")
+            if yn.lower() in ["y", "oui", "yes"]:
+                raise e
             continue
 
         expected = operation.compute(i, j)
