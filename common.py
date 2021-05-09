@@ -14,9 +14,15 @@ class Status:
         self.cpt_bad = 0
         self.difficults = set()
         self.temps = []
+        self.previous = None
+        self.streak = 0
+        self.longest_streak = 0
 
 
 class Operation(Enum):
+    def __init__(self, _):
+        self.success = None
+
     Add = auto()
     Sub = auto()
     Mult = auto()
@@ -77,6 +83,19 @@ def exo(i, j, operation, status):
     start_t = datetime.now()
     while True:
         os.system("clear")
+        if status.previous is not None:
+            if status.previous.success:
+                print(
+                    f"{Bcolors.HEADER}Bien joué :){Bcolors.ENDC} tu en as fait {status.streak} sans faire de fautes"
+                )
+            else:
+                print(f"{Bcolors.FAIL}Arf dommage :({Bcolors.ENDC}")
+        else:
+            print("Exercice-time :)")
+
+        print(
+            f"Record sans fautes: {Bcolors.HEADER}{status.longest_streak}{Bcolors.ENDC}"
+        )
         print(f"Opérations réussies: {Bcolors.HEADER}{len(status.dones)}{Bcolors.ENDC}")
         print(f"Opérations à faire: {Bcolors.OKBLUE}{len(status.to_do)}{Bcolors.ENDC}")
         print(
@@ -98,6 +117,9 @@ def exo(i, j, operation, status):
 
         expected = operation.compute(i, j)
         success = res == expected
+
+        operation.success = success
+        status.previous = operation
         print(f"{txt} {expected}")
         if success:
             print(f"{Bcolors.HEADER}bravo{Bcolors.ENDC}\n")
@@ -121,9 +143,13 @@ def do_exercise(to_do):
                 ele = status.failed.pop()
             res = exo(*ele, status)
             if res == "success":
+                status.streak += 1
+                if status.longest_streak < status.streak:
+                    status.longest_streak = status.streak
                 status.cpt_good += 1
                 status.dones.append(ele)
             else:
+                status.streak = 0
                 status.difficults.add(ele)
                 status.cpt_bad += 1
                 # errors are added twice
